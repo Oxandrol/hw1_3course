@@ -1,78 +1,97 @@
-import sqlite3
-conn = sqlite3.connect('my_database.db')
-cursor = conn.cursor()
+from aiogram import types, Bot, Dispatcher
+from aiogram.utils import executor
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from decouple import config
 
-cursor.execute('''CREATE TABLE IF NOT EXISTS countries
-                  (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                   title TEXT NOT NULL)''')
-
-cursor.execute("INSERT INTO countries (title) VALUES ('Россия'), "
-               "('США'),"
-               " ('Китай')")
-
-cursor.execute('''CREATE TABLE IF NOT EXISTS cities
-                  (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                   title TEXT NOT NULL,
-                   area REAL DEFAULT 0,
-                   country_id INTEGER NOT NULL,
-                   FOREIGN KEY(country_id) REFERENCES countries(id))''')
-
-cursor.execute("INSERT INTO cities (title, country_id) VALUES ('Москва', 1),"
-               " ('Нью-Йорк', 2),"
-               " ('Шанхай', 3),"
-               " ('Пекин', 3),"
-               " ('Токио', 4),"
-               " ('Париж', 5), "
-               "('Берлин', 6)")
+import logging
 
 
 
-cursor.execute('''CREATE TABLE IF NOT EXISTS employees
-                  (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                   first_name TEXT NOT NULL,
-                   last_name TEXT NOT NULL,
-                   city_id INTEGER NOT NULL,
-                   FOREIGN KEY(city_id) REFERENCES cities(id))''')
-
-cursor.execute("INSERT INTO employees (first_name, last_name, city_id) VALUES ('Сергей', 'Иванов', 1),"
-               " ('Петр', 'Петров', 2),"
-               " ('Анна', 'Ахматова', 3),"
-               " ('Ирина', 'Шайгу', 3),"
-               " ('Константин', 'Хабенский', 7),"
-               " ('Александр', 'Сергеев', 5),"
-               " ('Ольга', 'Картункова', 6),"
-               " ('Алексей', 'Учитель', 6),"
-               " ('Аполинария', 'Еленова', 4),"
-               " ('Артур', 'Рахманов', 7),"
-               " ('Мария', 'Кравец', 4),"
-               " ('Дмитрий', 'Лысый', 3),"
-               " ('Наталья', 'Спасокукоцкая', 2),"
-               " ('Александр', 'Пушкин', 7),"
-               " ('Екатерина', 'Вторая', 5)")
-
-conn.commit()
 
 
+TOKEN = config("TOKEN")
 
-cursor.execute("SELECT id, title FROM cities")
-cities = cursor.fetchall()
-print("Список городов:")
-for city in cities:
-    print(str(city[0]) + " - " + city[1])
+bot = Bot(token=TOKEN)
+dp =  Dispatcher(bot=bot)
 
-city_id = int(input("Введите id города для вывода списка сотрудников или 0 для выхода: "))
+@dp.message_handler(commands=['mem'])
+async def process_photo_command(message: types.Message):
+    with open("photo.jpg", 'rb') as photo:
+        await bot.send_photo(chat_id=message.chat.id, photo = photo)
 
-while city_id != 0:
-    cursor.execute('''SELECT employees.first_name, employees.last_name, countries.title, cities.title
-                          FROM employees
-                          JOIN cities ON employees.city_id = cities.id
-                          JOIN countries ON cities.country_id = countries.id
-                          WHERE cities.id = ?''', (city_id,))
-    employees = cursor.fetchall()
-    print("Сотрудники в городе:")
-    for employee in employees:
-        print(employee[0] + " " + employee[1] + " - " + employee[2] + ", " + employee[3])
 
-    city_id = int(input(f"Введите id города ({city}) для вывода списка сотрудников или 0 для выхода: "))
+@dp.message_handler(commands=['quiz'])
+async def quiz_1(message: types.Message):
+    markup = InlineKeyboardMarkup()
+    button_1 = InlineKeyboardButton("NEXT", callback_data="quiz_1_button")
+    markup.add(button_1)
 
-conn.close()
+    question = "Когда была земельно-водная реформа на Севере Кыргызстана?"
+    answer = [
+        "Весна 1921 года",
+        "Зима 1930 года",
+        "Осень 1941",
+        "Лето 1488 года",
+
+    ]
+
+    await bot.send_poll(
+        chat_id=message.from_user.id,
+        question=question,
+        options=answer,
+        is_anonymous=False,
+        type="quiz",
+        correct_option_id=0,
+        explanation="На истории Кыргызстана бы убили",
+        open_period=10,
+        reply_markup=markup
+    )
+    # await message.answer_poll()
+
+
+@dp.callback_query_handler(text="quiz_1_button")
+async def quiz_2(call: types.CallbackQuery):
+    question = "Кто написал Евгений Онегин ?"
+    answer = [
+        "Никита Михалков",
+        "Путин",
+        "Лев Толстой",
+        "ХЗ",
+        "Пушкин",
+        "Александр Сергеевич",
+    ]
+
+    await bot.send_poll(
+        chat_id=call.from_user.id,
+        question=question,
+        options=answer,
+        is_anonymous=False,
+        type="quiz",
+        correct_option_id=4,
+        explanation="Дурачок была же подсказка",
+        open_period=10,
+    )
+
+@dp.message_handler()
+async def message_handler(message: types.Message):
+    await bot.send_message(chat_id=message.from_user.id, text=message.text)
+    try:
+        number = int(message.text)
+        result = number ** 2
+        await message.answer(str(result))
+        await message.reply("Это число которое возводится в квадрат!")
+    except ValueError:
+        pass
+
+
+@dp.message_handler()
+async def echo(message: types.Message):
+    await bot.send_message(chat_id=message.from_user.id, text=message.text)
+
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO)
+    executor.start_polling(dp, skip_updates=True)
+
+
