@@ -14,9 +14,9 @@ async def game(message: types.Message):
 async def pin(message: types.Message):
     if message.chat.type != 'private':
         if message.from_user.id not in ADMINS:
-            await message.answer("Ты не мой господин!")
+            await message.answer("Я не буду тебе приклоняться!")
         elif not message.reply_to_message:
-            await message.answer('Команда должна быть ответом на сообщение!')
+            await message.answer('Только ответ на сообщение!!!!')
         else:
             await bot.pin_chat_message(
                 message.chat.id,
