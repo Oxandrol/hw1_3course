@@ -11,6 +11,7 @@ async def game(message: types.Message):
     else:
         await bot.send_message(message.chat.id, 'Ты не мой господин')
 
+
 async def pin(message: types.Message):
     if message.chat.type != 'private':
         if message.from_user.id not in ADMINS:
@@ -28,4 +29,4 @@ async def pin(message: types.Message):
 
 def register_handlers_admin(dp: Dispatcher):
     dp.register_message_handler(pin, commands=['pin'], commands_prefix='!/')
-    dp.register_message_handler(game , commands=["dice"])
+    dp.register_message_handler(game, commands=["dice"])
