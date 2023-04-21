@@ -1,4 +1,4 @@
-from aiogram import types, Dispatcher,bot ,Bot
+from aiogram import types, Dispatcher, bot, Bot
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import State, StatesGroup
@@ -64,7 +64,6 @@ async def load_age(message: types.Message, state: FSMContext):
     await message.answer("Скажи группу)")
 
 
-
 async def load_group(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         data["group"] = message.text
@@ -98,5 +97,5 @@ def register_handlers_fsm(dp: Dispatcher):
     dp.register_message_handler(load_name, state=FSMAdmin.name)
     dp.register_message_handler(load_direction, state=FSMAdmin.direction)
     dp.register_message_handler(load_age, state=FSMAdmin.age)
-    dp.register_message_handler(load_group, state=FSMAdmin.group,)
+    dp.register_message_handler(load_group, state=FSMAdmin.group, )
     dp.register_message_handler(submit_state, state=FSMAdmin.submit)
