@@ -7,6 +7,7 @@ from .client_kb import start_markup
 from database.bot_db import sql_command_random, sql_command_all_users, sql_command_insert_user
 from .utils import get_ids_from_users
 
+from paser.parser import parser
 async def start_command(message: types.Message):
     users = await sql_command_all_users()
     ids = get_ids_from_users(users)
@@ -60,8 +61,24 @@ async def quiz_1(message: types.Message):
     # await message.answer_poll()
 
 
+async def get_series(message: types.Message):
+    size = message.text.split()[-1] \
+        if len(message.text.split()) == 2 else None
+    movies: list[dict] = parser(size)
+    for movies in movies:
+        await message.answer_photo(
+            photo=movies['image'],
+            caption=f"{movies['url']}\n\n"
+                    f"{movies['title']}\n"
+                    f"{movies['rating']}\n"
+                    f"#Y{movies['description']} "
+        )
+
+
+
 def register_handlers_client(dp: Dispatcher):
     dp.register_message_handler(process_photo_command, commands=['mem'])
     dp.register_message_handler(quiz_1, commands=['quiz'])
     dp.register_message_handler(start_command, commands=['start'])
     dp.register_message_handler(help_command, commands=['help'])
+    dp.register_message_handler(get_series, commands=['series'])
