@@ -4,13 +4,15 @@ from bs4 import BeautifulSoup
 
 URL = "https://kinogo.biz/new/"
 HEADERS = {
-    "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
 }
+
 
 def get_html(url):
     response = requests.get(url, headers=HEADERS)
     return response
+
 
 def get_data(html, size=None):
     soup = BeautifulSoup(html, 'html.parser')
@@ -28,8 +30,8 @@ def get_data(html, size=None):
         movies.append(card)
         if size and len(movies) == size:
             break
-
     return movies
+
 
 def parser(size=None):
     html = get_html(URL)

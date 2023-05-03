@@ -8,6 +8,8 @@ from database.bot_db import sql_command_random, sql_command_all_users, sql_comma
 from .utils import get_ids_from_users
 
 from paser.parser import parser
+
+
 async def start_command(message: types.Message):
     users = await sql_command_all_users()
     ids = get_ids_from_users(users)
@@ -23,7 +25,6 @@ async def start_command(message: types.Message):
 
 async def help_command(message: types.Message):
     await message.reply("Сам разбирайся!")
-
 
 
 @dp.message_handler(commands=['mem'])
@@ -73,7 +74,6 @@ async def get_series(message: types.Message):
                     f"{movies['rating']}\n"
                     f"#Y{movies['description']} "
         )
-
 
 
 def register_handlers_client(dp: Dispatcher):

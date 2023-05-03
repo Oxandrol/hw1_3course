@@ -5,20 +5,22 @@ import logging
 
 from config import dp, bot, ADMINS
 
-
+from new_func import news
 from handlers import client
 from handlers import callback
 from handlers import admin
 from handlers import fsmadmin
 from handlers import schedule
 from database.bot_db import sql_create
-
 # from database.bot_db import sql_create
 # from handlers import extra
+news.register_handlers_news(dp)
 fsmadmin.register_handlers_fsm(dp)
+
 client.register_handlers_client(dp)
 admin.register_handlers_admin(dp)
 callback.register_handler_callback(dp)
+
 
 
 async def on_startup(dp):
